@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Análisis Comparativo de Mercado | Quantum Motors</title>
+
+<!-- Chart.js (librería de gráficos estable, un solo archivo, sin dependencias) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<style>
+  :root {
+    --primary: #10B981;
+    --secondary: #34D399;
+    --tertiary: #6EE7B7;
+    --light: #D1FAE5;
+    --dark: #059669;
+    --accent: #047857;
+    --gray-700: #374151;
+    --gray-600: #4B5563;
+    --gray-500: #6B7280;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(to bottom right, #ecfdf5, #ecfeff);
+    color: #111827;
+  }
+
+  .container { max-width: 1120px; margin: 0 auto; padding: 2rem 1rem; }
+
+  .card {
+    background: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  h1 { font-size: 2.25rem; font-weight: 700; color: #065f46; margin: 0 0 0.5rem; }
+  h2 { font-size: 1.5rem; font-weight: 600; color: var(--dark); margin: 0 0 1rem; }
+  h3 { font-size: 1.5rem; font-weight: 700; color: #065f46; margin: 0 0 1rem; }
+  h4 { font-size: 1.25rem; font-weight: 600; color: var(--accent); margin: 1.5rem 0 0.75rem; }
+  h5 { font-weight: 700; margin: 0 0 0.75rem; }
+  p { color: var(--gray-600); line-height: 1.6; }
+
+  .intro-text { color: var(--gray-600); }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    background: #fff;
+    border-radius: 0.5rem 0.5rem 0 0;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+  }
+
+  .tab-btn {
+    flex: 1 1 auto;
+    padding: 0.9rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    background: #f3f4f6;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 4px solid transparent;
+  }
+  .tab-btn:hover { background: #ecfdf5; }
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-bottom: 4px solid var(--accent);
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .callout {
+    background: #ecfdf5;
+    border-left: 4px solid var(--primary);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.25rem;
+  }
+  .callout.alert {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+  }
+  .callout p { color: var(--gray-700); font-size: 0.9rem; margin: 0; }
+
+  .chart-note { font-size: 0.875rem; color: var(--gray-600); margin-top: 0.5rem; }
+
+  .chart-wrap { position: relative; width: 100%; height: 340px; }
+  .chart-wrap.tall { height: 400px; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+  }
+
+  .pill-box { border-radius: 0.5rem; padding: 1rem; border-width: 2px; border-style: solid; }
+  .pill-box.red { background: #fef2f2; border-color: #fca5a5; }
+  .pill-box.green { background: #ecfdf5; border-color: #6ee7b7; }
+  .pill-box h5.red-title { color: #991b1b; }
+  .pill-box h5.green-title { color: #065f46; }
+  .pill-box ul { margin: 0; padding-left: 1.1rem; font-size: 0.9rem; color: var(--gray-700); }
+  .pill-box li { margin-bottom: 0.4rem; }
+
+  .summary-box {
+    background: linear-gradient(to right, #059669, #047857);
+    color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+  .summary-box h3 { color: #fff; font-size: 1.875rem; margin-bottom: 1rem; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .summary-grid h4 {
+    color: #fff;
+    font-size: 1.15rem;
+    border-bottom: 2px solid #6ee7b7;
+    padding-bottom: 0.5rem;
+    margin-top: 0;
+  }
+  .summary-grid ul { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; }
+  .summary-grid li { margin-bottom: 0.4rem; }
+
+  .conclusion-box {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+
+  .footer-note {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="card">
+    <h1>Análisis Comparativo de Mercado</h1>
+    <h2>Clientes Potenciales vs Clientes Actuales</h2>
+    <p class="intro-text">Dashboard con análisis del cruce de variables entre clientes potenciales (n=386) y clientes actuales (n=74) de Quantum Motors.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="demographics">Perfil Demográfico</button>
+    <button class="tab-btn" data-tab="behavior">Comportamiento</button>
+    <button class="tab-btn" data-tab="preferences">Preferencias</button>
+    <button class="tab-btn" data-tab="barriers">Barreras</button>
+    <button class="tab-btn" data-tab="experience">Experiencia</button>
+  </div>
+
+  <div class="card">
+
+    <!-- DEMOGRÁFICO -->
+    <div class="tab-panel active" id="panel-demographics">
+      <h3>Análisis Demográfico Comparativo</h3>
+      <div class="callout">
+        <p><strong>Insight Principal:</strong> Los clientes actuales muestran perfil más masculino (75.7% vs 57.9%), mayor poder adquisitivo (70.3% gana más de 4,500 Bs vs 46%) concentrados en 26-45 años.</p>
+      </div>
+
+      <h4>Distribución por Género</h4>
+      <div class="chart-wrap"><canvas id="chart-gender"></canvas></div>
+      <p class="chart-note"><strong>GAP Crítico:</strong> Brecha de género de 17.8 puntos. Se requiere marketing más inclusivo.</p>
+
+      <h4>Distribución por Edad</h4>
+      <div class="chart-wrap"><canvas id="chart-age"></canvas></div>
+      <p class="chart-note"><strong>Millennials dominantes:</strong> 83.7% de actuales tienen 26-45 años.</p>
+
+      <h4>Nivel Educativo</h4>
+      <div class="chart-wrap"><canvas id="chart-education"></canvas></div>
+
+      <h4>Nivel de Ingresos</h4>
+      <div class="chart-wrap"><canvas id="chart-income"></canvas></div>
+      <p class="chart-note"><strong>Barrera Principal:</strong> 24.3 puntos de diferencia. Financiamiento CRÍTICO.</p>
+    </div>
+
+    <!-- COMPORTAMIENTO -->
+    <div class="tab-panel" id="panel-behavior">
+      <h3>Comportamiento y Journey del Cliente</h3>
+      <div class="callout">
+        <p><strong>Insight:</strong> 75.2% en investigación/comparación. Alta intención pero ciclo largo.</p>
+      </div>
+
+      <h4>Etapa en Journey</h4>
+      <div class="chart-wrap tall"><canvas id="chart-stage"></canvas></div>
+      <p class="chart-note">Solo 10.3% en decisión inmediata. Nurturing agresivo necesario.</p>
+
+      <h4>Canal de Contacto</h4>
+      <div class="chart-wrap"><canvas id="chart-channel"></canvas></div>
+      <p class="chart-note">Journey híbrido: investigan online, compran offline.</p>
+
+      <h4>Motivaciones</h4>
+      <div class="chart-wrap"><canvas id="chart-motivation"></canvas></div>
+    </div>
+
+    <!-- PREFERENCIAS -->
+    <div class="tab-panel" id="panel-preferences">
+      <h3>Preferencias y Características</h3>
+      <div class="callout">
+        <p><strong>Desconexión:</strong> Potenciales priorizan precio, actuales valoran autonomía/postventa.</p>
+      </div>
+
+      <h4>Top Características</h4>
+      <div class="chart-wrap tall"><canvas id="chart-characteristics"></canvas></div>
+
+      <h4>Factores Decisivos</h4>
+      <div class="chart-wrap"><canvas id="chart-decisive"></canvas></div>
+      <p class="chart-note">41.8 puntos de brecha en precio. Comunicar VALOR, no solo costo.</p>
+    </div>
+
+    <!-- BARRERAS -->
+    <div class="tab-panel" id="panel-barriers">
+      <h3>Barreras y Oportunidades</h3>
+      <div class="callout alert">
+        <p><strong>ALERTA:</strong> Barreras pre-compra NO coinciden con problemas post-compra.</p>
+      </div>
+
+      <h4>Principales Barreras</h4>
+      <div class="chart-wrap tall"><canvas id="chart-barriers"></canvas></div>
+      <p class="chart-note">Red de carga y postventa: 0% preocupa antes, 27-31% después.</p>
+
+      <div class="grid-2">
+        <div>
+          <h4>NPS Distribución</h4>
+          <div class="chart-wrap"><canvas id="chart-nps"></canvas></div>
+        </div>
+        <div>
+          <h4>NPS Score</h4>
+          <div class="chart-wrap"><canvas id="chart-nps-score"></canvas></div>
+        </div>
+      </div>
+      <p class="chart-note">Brecha de 26.7 puntos. Experiencia NO supera expectativas.</p>
+    </div>
+
+    <!-- EXPERIENCIA -->
+    <div class="tab-panel" id="panel-experience">
+      <h3>Experiencia: Expectativas vs Realidad</h3>
+
+      <h4>SERVPERF Comparativa</h4>
+      <div class="chart-wrap tall"><canvas id="chart-servperf"></canvas></div>
+      <p class="chart-note">Personal supera expectativas. Procesos y tecnología en tienda bajo expectativas.</p>
+
+      <div class="grid-2" style="margin-top:1.5rem;">
+        <div class="pill-box red">
+          <h5 class="red-title">Puntos de Dolor</h5>
+          <ul>
+            <li>Tiempos de espera: 70% satisfacción</li>
+            <li>Tecnología tienda: 70% satisfacción</li>
+            <li>Seguimiento post-venta: 83%</li>
+            <li>Test drive: 80% satisfacción</li>
+          </ul>
+        </div>
+        <div class="pill-box green">
+          <h5 class="green-title">Fortalezas</h5>
+          <ul>
+            <li>Amabilidad: 95% satisfacción</li>
+            <li>Conocimiento: 92% satisfacción</li>
+            <li>Limpieza: 95% satisfacción</li>
+            <li>Vehículos: 93% satisfacción</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="summary-box">
+    <h3>Resumen Ejecutivo</h3>
+    <div class="summary-grid">
+      <div>
+        <h4>Perfil Ideal</h4>
+        <ul>
+          <li>• Hombre 26-45 años, universitario</li>
+          <li>• Ingresos más de 4,500 Bs</li>
+          <li>• Investiga online, decide offline</li>
+          <li>• Valora tecnología + marca BO</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Barreras Críticas</h4>
+        <ul>
+          <li>• 54% potenciales bajo umbral económico</li>
+          <li>• 75% en evaluación prolongada</li>
+          <li>• Dudas: postventa, red carga, topografía</li>
+          <li>• Procesos lentos frustran</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Fortalezas</h4>
+        <ul>
+          <li>• Personal excelente (95%)</li>
+          <li>• Showroom impecable (95%)</li>
+          <li>• Alta consideración marca (73%)</li>
+          <li>• Marca BO resuena (20%)</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Acciones</h4>
+        <ul>
+          <li>• Marketing inclusivo mujeres</li>
+          <li>• Calculadoras digitales</li>
+          <li>• Test drives ágiles</li>
+          <li>• Soporte WhatsApp 24/7</li>
+        </ul>
+      </div>
+    </div>
+    <div class="conclusion-box">
+      <strong>Conclusión:</strong> Producto sólido, awareness alto, pero pierde conversión en milla final. Oportunidad: digitalizar journey y transformar postventa en ventaja competitiva.
+    </div>
+  </div>
+
+  <p class="footer-note">Análisis basado en 386 potenciales y 74 actuales | Quantum Motors | Diciembre 2025</p>
+
+</div>
+
+<script>
+// ---------- Datos ----------
+const COLORS = {
+  primary: '#10B981',
+  secondary: '#34D399',
+  tertiary: '#6EE7B7',
+  light: '#D1FAE5',
+  dark: '#059669',
+  accent: '#047857'
+};
+
+const genderData = { labels: ['Potenciales', 'Actuales'], Hombre: [57.9, 75.7], Mujer: [42.1, 24.3] };
+
+const ageData = {
+  labels: ['18-25', '26-35', '36-45', '46-55', '>55'],
+  Potenciales: [5.2, 40.9, 36.8, 14.3, 2.9],
+  Actuales: [5.4, 43.2, 40.5, 8.1, 2.7]
+};
+
+const educationData = {
+  labels: ['Secundaria', 'Técnico', 'Licenciatura', 'Maestría'],
+  Potenciales: [2.3, 15.5, 56.2, 26.0],
+  Actuales: [4.1, 9.5, 59.5, 27.0]
+};
+
+const incomeData = {
+  labels: ['<4,500', '=4,500', '>4,500'],
+  Potenciales: [22.6, 31.4, 46.0],
+  Actuales: [8.1, 21.6, 70.3]
+};
+
+const purchaseStageData = {
+  labels: ['Curiosidad', 'Investigando', 'Comparando', 'Decidido', 'Próximo'],
+  values: [14.5, 38.9, 36.3, 3.6, 6.7]
+};
+
+const contactChannelData = {
+  labels: ['RRSS', 'Tienda', 'Recomendación', 'Web', 'Amigos'],
+  Potenciales: [47.2, 0, 0, 0, 24.1],
+  Actuales: [52.7, 32.4, 10.8, 4.1, 0]
+};
+
+const motivationData = {
+  labels: ['Ahorro', 'Ecología', 'Tecnología P', 'Migrar Gas', 'Tecnología A', 'Ecología A'],
+  values: [36.8, 19.4, 16.1, 48.6, 35.1, 16.2]
+};
+
+const characteristicsData = {
+  labels: ['Precio', 'Potencia', 'Seguridad', 'Autonomía P', 'Autonomía A', 'Postventa', 'Red carga'],
+  Potenciales: [68.4, 52.6, 48.7, 43.0, 0, 0, 0],
+  Actuales: [0, 0, 0, 0, 62.2, 31.1, 27.0]
+};
+
+const barriersData = {
+  labels: ['Autonomía', 'Red carga', 'Postventa', 'Topografía', 'Precio'],
+  Potenciales: [43.0, 0, 0, 15.8, 68.4],
+  Actuales: [40.5, 27.0, 31.1, 8.1, 12.2]
+};
+
+const npsData = {
+  labels: ['Promotores', 'Pasivos', 'Detractores'],
+  Potenciales: [21.9, 63.3, 14.8],
+  Actuales: [47.3, 39.2, 13.5]
+};
+
+const npsScoreData = { labels: ['NPS'], Potenciales: [7.1], Actuales: [33.8] };
+
+const decisiveFactorsData = {
+  labels: ['Precio', 'Tecnología', 'Ser BO', 'Garantías', 'Repuestos'],
+  Potenciales: [58.0, 36.3, 21.2, 18.9, 18.1],
+  Actuales: [16.2, 18.9, 20.3, 10.8, 16.2]
+};
+
+const servperfData = {
+  labels: ['Personal', 'Procesos', 'Física', 'Digital', 'Facilidad'],
+  Potenciales: [4.23, 4.23, 4.08, 4.08, 4.03],
+  Actuales: [4.38, 3.98, 3.80, 4.06, 4.03]
+};
+
+// ---------- Helpers ----------
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+Chart.defaults.color = '#4B5563';
+
+function barChart(ctx, labels, datasets, opts) {
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: Object.assign({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: datasets.length > 1 } },
+      scales: { y: { beginAtZero: true } }
+    }, opts || {})
+  });
+}
+
+function horizontalBarChart(ctx, labels, datasets) {
+  return barChart(ctx, labels, datasets, { indexAxis: 'y' });
+}
+
+// ---------- Gráficos: Demográfico ----------
+barChart(document.getElementById('chart-gender'), genderData.labels, [
+  { label: 'Hombre', data: genderData.Hombre, backgroundColor: COLORS.primary },
+  { label: 'Mujer', data: genderData.Mujer, backgroundColor: COLORS.secondary }
+]);
+
+barChart(document.getElementById('chart-age'), ageData.labels, [
+  { label: 'Potenciales', data: ageData.Potenciales, backgroundColor: COLORS.tertiary },
+  { label: 'Actuales', data: ageData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-education'), educationData.labels, [
+  { label: 'Potenciales', data: educationData.Potenciales, backgroundColor: COLORS.tertiary },
+  { label: 'Actuales', data: educationData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-income'), incomeData.labels, [
+  { label: 'Potenciales', data: incomeData.Potenciales, backgroundColor: COLORS.light },
+  { label: 'Actuales', data: incomeData.Actuales, backgroundColor: COLORS.accent }
+]);
+
+// ---------- Gráficos: Comportamiento ----------
+new Chart(document.getElementById('chart-stage'), {
+  type: 'pie',
+  data: {
+    labels: purchaseStageData.labels,
+    datasets: [{
+      data: purchaseStageData.values,
+      backgroundColor: [COLORS.primary, COLORS.secondary, COLORS.tertiary, COLORS.light, COLORS.accent]
+    }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+});
+
+barChart(document.getElementById('chart-channel'), contactChannelData.labels, [
+  { label: 'Potenciales', data: contactChannelData.Potenciales, backgroundColor: COLORS.secondary },
+  { label: 'Actuales', data: contactChannelData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-motivation'), motivationData.labels, [
+  { label: 'Frecuencia (%)', data: motivationData.values, backgroundColor: COLORS.primary }
+]);
+
+// ---------- Gráficos: Preferencias ----------
+horizontalBarChart(document.getElementById('chart-characteristics'), characteristicsData.labels, [
+  { label: 'Potenciales', data: characteristicsData.Potenciales, backgroundColor: COLORS.secondary },
+  { label: 'Actuales', data: characteristicsData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-decisive'), decisiveFactorsData.labels, [
+  { label: 'Potenciales', data: decisiveFactorsData.Potenciales, backgroundColor: COLORS.light },
+  { label: 'Actuales', data: decisiveFactorsData.Actuales, backgroundColor: COLORS.accent }
+]);
+
+// ---------- Gráficos: Barreras ----------
+horizontalBarChart(document.getElementById('chart-barriers'), barriersData.labels, [
+  { label: 'Potenciales', data: barriersData.Potenciales, backgroundColor: COLORS.secondary },
+  { label: 'Actuales', data: barriersData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-nps'), npsData.labels, [
+  { label: 'Potenciales', data: npsData.Potenciales, backgroundColor: COLORS.tertiary },
+  { label: 'Actuales', data: npsData.Actuales, backgroundColor: COLORS.primary }
+]);
+
+barChart(document.getElementById('chart-nps-score'), npsScoreData.labels, [
+  { label: 'Potenciales', data: npsScoreData.Potenciales, backgroundColor: COLORS.light },
+  { label: 'Actuales', data: npsScoreData.Actuales, backgroundColor: COLORS.accent }
+], { scales: { y: { beginAtZero: true, max: 50 } } });
+
+// ---------- Gráficos: Experiencia ----------
+new Chart(document.getElementById('chart-servperf'), {
+  type: 'radar',
+  data: {
+    labels: servperfData.labels,
+    datasets: [
+      {
+        label: 'Potenciales',
+        data: servperfData.Potenciales,
+        borderColor: COLORS.secondary,
+        backgroundColor: 'rgba(52, 211, 153, 0.3)'
+      },
+      {
+        label: 'Actuales',
+        data: servperfData.Actuales,
+        borderColor: COLORS.primary,
+        backgroundColor: 'rgba(16, 185, 129, 0.5)'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { r: { min: 0, max: 5 } }
+  }
+});
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
